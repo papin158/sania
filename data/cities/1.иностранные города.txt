@@ -1,0 +1,7 @@
+Almaty, Алматы, Bishkek, Fethiye, Mińsk Mazowiecki, Ташкент, Tashkent,Yerevan, Ереван, Бангкок, Limassol, Белград,
+Дубай, Баку,Анталья, Antalya, Анталья, Warsaw, Minsk, Минск, Batumi, İzmir,Tbilisi, Gyumri, Стамбул, Астана, Ankara,
+New York,Gomel,Нур-Султан, Astana, Фетхие, İstanbul, Пхукет, Таджикабад, Бишкек, Rio de Janeiro, Mogilev,Гродно,
+Кишинёв, Шымкент, Караганда, Baku, Akkurgan, Bukhara,Тбилиси,Copenhagen,Odisha,Jerusalem, Tallinn,Antalya,Будва,Sofia,
+Berlin,Берлин,Тиват,Кипра,Лимассол,Ialoveni,Фергана,Uchkurgan, Budva,Andijan,Vancouver,Гюмри,Belgrade,Ubud,Yerevan,
+Ashgabat,Tokyo,Караганда,Daejeon, Тэджон,Tel Aviv-Yafo,Haifa, Hurghada,Тель-Авив,Tel Aviv,Абу Даби,Abu Dhabi,Phuket,
+Пхукет, Helsinki, Хельсинки, Lisbon, Лисбон, Cairo, Каир,Талдыкорган

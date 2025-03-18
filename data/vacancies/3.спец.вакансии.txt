@@ -1,0 +1,39 @@
+Менеджер продукта (2ГИС.KIT) @ 2ГИС
+Владелец продукта @ ОТП Банк
+Системный аналитик @ ОТП Банк
+Product Designer @ Planner 5D
+Senior Golang Developer @ Магнит
+Менеджер продукта (2GIS.Pro) @ 2ГИС
+Старший менеджер продукта (Мобильное приложение) @ 2ГИС
+Senior Data Engineer @ Limavi
+ML Engineer @ Limavi
+Algorithm Trader @ SPV Capital
+Quantitative Trader @ SPV Capital
+Senior SQL Developer @ IBS InfiniSoft
+Senior Blockchain/Rust Engineer @ TechHive
+Senior Product Analyst @ Muse Group
+Product Owner @ Muse Group
+Менеджер проектов B2B (Товары) @ Avito
+Senior Product Desiger @ Planner 5D
+Разработчик Siebel CRM @ Росбанк
+Data Scientist (Big Data) @ ОТП Банк
+Senior Backend QA Engineer @ red_mad_robot
+Senior Frontend Engineer (Next.js + React) @ OK SOFT
+System Analyst (Web / Mobile) @ Золотое Яблоко
+Аналитик данных (Tableau) @ Sportmaster Lab
+Senior Product Manager (Search) @ SberMarket
+Product Manager (FinTech) @ Payler
+DevOps (FinTech) @ Payler
+Frontend Engineer (Supply) @ Wheely
+Product Manager @ Collectly
+Lead/Senior Frontend Engineer (Next.js + React) @ OK SOFT
+Fullstack .NET Developer @ Dodo Brands
+Product Manager (Payments) @ Payler
+Senior Product Manager @ Skyeng
+Руководитель продукта (Услуги) @ Avito
+Lead System Analyst @ Звук
+Senior Fullstack Developer @ Магнит
+TypeScript Developer with 2D/3D graphics @ Planner 5D
+Full-Stack Developer @ Planner 5D
+Senior Java Developer (Internal Tools) @ Planner 5D
+Unity and Windows Developer @ Planner 5D
