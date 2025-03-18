@@ -38,5 +38,6 @@ __all__ = [
     "ReturnValue",
     "max_windows",
     "get_txt_data",
-    "set_intercept_request"
+    "set_intercept_request",
+    "tg_token"
 ]
