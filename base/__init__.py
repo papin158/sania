@@ -1,6 +1,5 @@
 import re
 import typing
-from collections import deque
 from time import sleep
 
 from bs4 import BeautifulSoup
@@ -21,7 +20,8 @@ class BaseFunctions:
     def __init__(self, driver):
         self.driver = driver
         self.pages: list[dict] = []
-        self.raw_pages: list = []
+        self.gms_pages: list[dict] = []
+        self.main_page = driver.current_window_handle
 
     def login(self):
         self.driver.get("https://office.gms.tech")
@@ -38,6 +38,7 @@ class BaseFunctions:
         self.login()
 
     def open_link(self, link):
+        self.driver.switch_to.window(self.main_page)
         self.driver.create_new_tab(link)
 
     def close_all_windows(self):
@@ -45,16 +46,21 @@ class BaseFunctions:
         for window in browser_list[1:]:
             self.driver.switch_to.window(window)
             self.driver.close()
+        self.driver.switch_to.window(self.main_page)
 
-    def find_and_open_link(self, raw_condition, is_pop=True, is_eval=True, pre_func=None, eval_args: dict =None):
-        for i, otklik in enumerate(self.pages):
+    def find_and_open_link(self, raw_condition, iterator: list = None, is_pop=True, is_eval=True, pre_func=None, eval_args: dict =None):
+        if not isinstance(iterator, list): iterator = self.pages
+        if not eval_args: eval_args = {}
+
+        for i, otklik in enumerate(iterator):
             res = pre_func() if callable(pre_func) else None
             if res == ReturnValue.breaking: break
             eval_args.update({'otklik': otklik})
             condition = eval(raw_condition, eval_args) if is_eval else raw_condition
             if condition:
                 self.open_link(otklik['link'])
-                if is_pop: self.pages.pop(i)
+                if is_pop: iterator.pop(i)
+        self.driver.switch_to.window(self.main_page)
 
     def exness_vac(self):
         send_msg(f'{AUTH.login_admin} открыл Exness')
@@ -71,35 +77,29 @@ class BaseFunctions:
         self.driver.switch_to.window(self.driver.window_handles[0])
         return num_page
 
-    def pages_analizing(self, gms=False):
-        def soup_analize(soup):
-            for i in soup.find('table', class_='table table-hover table-sm').find_all('tr')[1:]:
-                all_td = i.find_all('td')
-                otklick_dict = {'link': 'https://office.gms.tech' + all_td[0].find('a').get('href'),
-                                'vacancy_name': all_td[2].text.strip(),
-                                'grade': all_td[4].text.strip(),
-                                'profile_status': all_td[6].text.strip(),
-                                'verification_status': all_td[7].text.strip(),
-                                'mail': all_td[3].text.split(' ')[1].strip()
-                                }
-                for_analize.append(otklick_dict)
-                raw_pages.append(i)
-
-        for_analize = []
-        raw_pages = []
+    def find_gms_and_not(self, gms: bool):
         for num in range(1, self.how_many_pages() + 1):
             self.driver.get(f'https://office.gms.tech/candidate_applications?filter=waiting_for_review&page={num}{"&gms=true" if gms else ""}')
             _ = self.driver.find_element(By.XPATH, xpaths.table_body)
-            soup_analize(BeautifulSoup(self.driver.page_source, 'lxml'))
+            yield [*self.soup_analise(BeautifulSoup(self.driver.page_source, 'lxml'))]
 
-        return for_analize, raw_pages
+    def soup_analise(self, soup: BeautifulSoup):
+        for i in soup.find('table', class_='table table-hover table-sm').find_all('tr')[1:]:
+            all_td = i.find_all('td')
+            otklick_dict = {'link': 'https://office.gms.tech' + all_td[0].find('a').get('href').strip(),
+                            'vacancy_name': all_td[2].text.strip(),
+                            'grade': all_td[4].text.strip(),
+                            'profile_status': all_td[6].text.strip(),
+                            'verification_status': all_td[7].text.strip(),
+                            'mail': all_td[3].text.split(' ')[1].strip()
+                            }
+            yield otklick_dict
 
-    def refresh_pages_analizing(self):
-        self.pages.clear()
-        self.raw_pages.clear()
-        pages = self.pages_analizing()
-        self.pages += pages[0]
-        self.raw_pages += pages[1]
+    def refresh_pages_analysing(self, gms=False):
+        if gms:
+            self.gms_pages = sum([*self.find_gms_and_not(gms)], [])
+        else:
+            self.pages = sum([*self.find_gms_and_not(gms)], [])
 
     def get_otkliks(self):
         send_msg(f'{AUTH.login_admin} открыл Только РФ')
@@ -272,7 +272,7 @@ class BaseFunctions:
 
     def open_b_without_vac(self):
         send_msg(f'{AUTH.login_admin} открыть В-грейды без откликов')
-        self.find_and_open_link("tklik['profile_status'] == 'Профиль создан' and '@' not in otklik['vacancy_name']")
+        self.find_and_open_link("otklik['profile_status'] == 'Профиль создан' and '@' not in otklik['vacancy_name']")
 
 
     def open_all_c(self):
@@ -281,7 +281,7 @@ class BaseFunctions:
 
     def gms_vac(self):
         send_msg(f'{AUTH.login_admin} открыть вакансии GMS')
-        self.find_and_open_link("otklik['profile_status'] == 'Профиль создан'")
+        self.find_and_open_link("otklik['profile_status'] == 'Профиль создан'", iterator=self.gms_pages)
 
     def next_candidate(self, counter, to_predst):
         self.driver.switch_to.window(self.driver.window_handles[0])
