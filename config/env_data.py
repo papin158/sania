@@ -8,6 +8,6 @@ password_admin = os.getenv("PASSWORD_ADMIN")
 way_selen = os.getenv("WAY_SELEN")
 max_experience: list[int] = [round(float(os.getenv("MAX_EXPERIENCE")) * 12)]
 max_windows = int(os.getenv("MAX_WINDOWS"))
-token_data = os.getenv("TOKEN_DATA")
+tg_token = os.getenv("TOKEN_DATA")
 
 

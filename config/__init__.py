@@ -23,6 +23,7 @@ class XPATHs:
 class ReturnValue(enum.IntEnum):
     test = 0
     verify_or_GMS = 1
+    breaking = 2
 
 
 AUTH = AUTH()
