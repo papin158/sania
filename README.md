@@ -1,5 +1,7 @@
-<h1 style='color: white; background: linear-gradient(to bottom, #f54242 50%, #048206 50%); padding: 5rem 0; text-align: center;'>Привет, <b style='font-size: 25px; color: white;'>чанда!</b></h1>  
+<h1 style='color: white; background: linear-gradient(to bottom, #f54242 50%, #048206 50%); padding: 5rem 0; text-align: center;'>Привет, <b style='font-size: 25px; color: white;'>чанда!</b></h1> 
+
 ## Вакансии  
+
 Например: чтобы вставить вакансии к которым есть требование ТОЛЬКО РОССИЯ -> редактируй файл `2.российские вакансии.txt`, который находится в папке `data/vacancies`  
   
 Чтобы добавить новую вакансию, например в **Россию** (остальные по аналогии):    
