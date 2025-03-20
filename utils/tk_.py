@@ -170,24 +170,24 @@ class Main:
 
         close_all = tk.Button(self.root, text="закрыть окна", command=self.functions.close_all_windows)
         exness = tk.Button(self.root, text="Exness", command=self.functions.exness_vac)
-        eng_level = tk.Button(self.root, text=eng_level_text, command=self.functions.exness_check, fg="red")
+        eng_level = tk.Button(self.root, text=eng_level_text, command=lambda: self.start_thread(self.functions.exness_check), fg="red")
         rus_all = tk.Button(self.root, text="РФ все вакансии (открыть)", command=partial(self.functions.all_vacancies, russia.companies))
         rus_spec = tk.Button(self.root, text="РФ только по должностям (открыть)",
                              command=partial(self.functions.specific_vacancies, russia.vacancies))
         rus_auto_check = tk.Button(self.root, text="Только РФ (автоотказ)",
-                                   command=lambda: self.functions.city_check(russia.cities, ['Russia', 'Россия']), fg="red")
+                                   command=lambda: self.start_thread(self.functions.city_check(russia.cities, ['Russia', 'Россия'])), fg="red")
         no_rus_vac_all = tk.Button(self.root, text="Вне РФ все вакансии (открыть)",
                                    command=partial(self.functions.all_vacancies, other_countries.companies))
         no_rus_vac_spec = tk.Button(self.root, text="Вне РФ только по должностям (открыть)",
                                     command=partial(self.functions.all_vacancies, other_countries.vacancies))
         no_rus_auto_check = tk.Button(self.root, text="Вне РФ (автоотказ)",
-                                      command=lambda: self.functions.city_check(other_countries.cities, ['Russia', 'Россия'], False,
-                                                                 True), fg="red")
+                                      command=lambda: self.start_thread(self.functions.city_check(other_countries.cities, ['Russia', 'Россия'], False,
+                                                                 True)), fg="red")
         grade_a = tk.Button(self.root, text="А (открыть)", command=partial(self.functions.open_profile_for_grade, 1))
         grade_b = tk.Button(self.root, text="В (открыть)", command=partial(self.functions.open_profile_for_grade, 2))
         grade_without = tk.Button(self.root, text="Без грейда (открыть)", command=partial(self.functions.open_profile_for_grade, 3))
         special = tk.Button(self.root, text="Специальные вакансии (открыть)", command=self.functions.special_vac)
-        auto_a_grade = tk.Button(self.root, text="Автопредставления А грейдов", command=self.functions.auto_a, fg="red")
+        auto_a_grade = tk.Button(self.root, text="Автопредставления А грейдов", command=lambda: self.start_thread(self.functions.auto_a), fg="red")
         auto_b_outvac = tk.Button(self.root, text="Верифицировать В (!Без вакансий!)", command=lambda: self.start_thread(self.functions.auto_b_without_vac), fg="red")
         auto_gms_outvac = tk.Button(self.root, text="Автопредставление GMS", command=lambda: self.start_thread(self.functions.auto_b_without_vac), fg="red")
         open_b_without = tk.Button(self.root, text="Открыть В грейды без вакансий", command=self.functions.open_b_without_vac)
