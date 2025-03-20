@@ -19,10 +19,11 @@ from utils import send_msg, Pages
 
 
 class BaseFunctions:
-    def __init__(self, driver):
+    def __init__(self, driver, **kwargs):
         self.driver = driver
         self.pages: list[Pages] = []
         self.main_page = driver.current_window_handle
+        self.options = kwargs
 
     def login(self):
         self.driver.get(links.office)
@@ -40,7 +41,7 @@ class BaseFunctions:
 
     def open_link(self, link):
         self.driver.switch_to.window(self.main_page)
-        self.driver.create_new_tab(link, slow=True)
+        self.driver.create_new_tab(link, slow=self.options['type_open_links'])
 
     def close_all_windows(self):
         browser_list = self.driver.window_handles
