@@ -1,5 +1,7 @@
 import re
 import typing
+from collections import deque
+from copy import deepcopy
 from time import sleep
 
 from bs4 import BeautifulSoup
@@ -10,21 +12,20 @@ from config import (
     max_experience,
     max_windows as stop_num,
     spec_vacancies,
-    ReturnValue
+    ReturnValue, links
 )
 
-from utils import send_msg
+from utils import send_msg, Pages
 
 
 class BaseFunctions:
     def __init__(self, driver):
         self.driver = driver
-        self.pages: list[dict] = []
-        self.gms_pages: list[dict] = []
+        self.pages: list[Pages] = []
         self.main_page = driver.current_window_handle
 
     def login(self):
-        self.driver.get("https://office.gms.tech")
+        self.driver.get(links.office)
         user = self.driver.find_element(By.ID, "username")
         user.send_keys(AUTH.login_admin)
         passw = self.driver.find_element(By.ID, "password")
@@ -52,23 +53,30 @@ class BaseFunctions:
         if not isinstance(iterator, list): iterator = self.pages
         if not eval_args: eval_args = {}
 
-        for i, otklik in enumerate(iterator):
+        new_iterator = deepcopy(iterator)
+        indexes = deque()
+        for i, otklik in enumerate(new_iterator):
             res = pre_func() if callable(pre_func) else None
             if res == ReturnValue.breaking: break
             eval_args.update({'otklik': otklik})
             condition = eval(raw_condition, eval_args) if is_eval else raw_condition
             if condition:
                 self.open_link(otklik['link'])
-                if is_pop: iterator.pop(i)
+                indexes.appendleft(i)
+
+
+        if is_pop:
+            for i in indexes:
+                iterator.pop(i)
         self.driver.switch_to.window(self.main_page)
 
     def exness_vac(self):
         send_msg(f'{AUTH.login_admin} открыл Exness')
-        self.find_and_open_link("otklik['profile_status'] == 'Профиль создан' and otklik['grade'] != 'C' and '@ Exness' in otklik['vacancy_name']")
+        self.find_and_open_link("otklik['grade'] != 'C' and '@ Exness' in otklik['vacancy_name']")
 
-    def how_many_pages(self):
+    def how_many_pages(self, gms: bool):
         self.driver.switch_to.window(self.driver.window_handles[0])
-        self.driver.get('https://office.gms.tech/candidate_applications?filter=waiting_for_review&page=1')
+        self.driver.get(links.get_waiting_for_review(1, gms))
         try:
             num_page = int(self.driver.find_element(By.XPATH, xpaths.pagination).text.split('\n')[-2].strip())
         except:
@@ -78,36 +86,28 @@ class BaseFunctions:
         return num_page
 
     def find_gms_and_not(self, gms: bool):
-        for num in range(1, self.how_many_pages() + 1):
-            self.driver.get(f'https://office.gms.tech/candidate_applications?filter=waiting_for_review&page={num}{"&gms=true" if gms else ""}')
+        for num in range(1, self.how_many_pages(gms) + 1):
+            if num != 1: self.driver.get(links.get_waiting_for_review(num, gms))
             _ = self.driver.find_element(By.XPATH, xpaths.table_body)
             yield [*self.soup_analise(BeautifulSoup(self.driver.page_source, 'lxml'))]
 
     def soup_analise(self, soup: BeautifulSoup):
         for i in soup.find('table', class_='table table-hover table-sm').find_all('tr')[1:]:
             all_td = i.find_all('td')
-            otklick_dict = {'link': 'https://office.gms.tech' + all_td[0].find('a').get('href').strip(),
-                            'vacancy_name': all_td[2].text.strip(),
-                            'grade': all_td[4].text.strip(),
-                            'profile_status': all_td[6].text.strip(),
-                            'verification_status': all_td[7].text.strip(),
-                            'mail': all_td[3].text.split(' ')[1].strip()
-                            }
+            profile_status = all_td[6].text.strip()
+            if profile_status != 'Профиль создан': continue
+            otklick_dict = Pages(
+                link                = links.office + all_td[0].find('a').get('href').strip(),
+                vacancy_name        = all_td[2].text.strip(),
+                grade               = all_td[4].text.strip(),
+                profile_status      = profile_status,
+                verification_status = all_td[7].text.strip(),
+                mail                = all_td[3].text.split(' ')[1].strip()
+            )
             yield otklick_dict
 
     def refresh_pages_analysing(self, gms=False):
-        if gms:
-            self.gms_pages = sum([*self.find_gms_and_not(gms)], [])
-        else:
-            self.pages = sum([*self.find_gms_and_not(gms)], [])
-
-    def get_otkliks(self):
-        send_msg(f'{AUTH.login_admin} открыл Только РФ')
-        otkliks = []
-        for otklik in self.pages:
-            if otklik['profile_status'] == 'Профиль создан' and otklik['grade'] != 'C' and '@' in otklik['vacancy_name']:
-                    otkliks.append(otklik)
-        return iter(otkliks)
+        self.pages = sum([*self.find_gms_and_not(gms)], [])
 
     def all_vacancies(self, companies):
         eval_args = dict(companies=companies)
@@ -190,7 +190,7 @@ class BaseFunctions:
 
         eval_args = dict(grade=grade)
         self.find_and_open_link(
-            "otklik['profile_status'] == 'Профиль создан' and otklik['grade'] == grade",
+            "otklik['grade'] == grade",
             pre_func=self.find_stop_count_opened_windows, eval_args=eval_args
         )
 
@@ -205,7 +205,7 @@ class BaseFunctions:
         full_vacancy_name = spec_vacancies  # вставить сюда название вакансии в формате: 'UX/UI Designer @ Leroy Merlin'
         eval_args = dict(full_vacancy_name=full_vacancy_name)
         self.find_and_open_link(
-            "otklik['profile_status'] == 'Профиль создан' and otklik['grade'] != 'C' and otklik['vacancy_name'] in full_vacancy_name",
+            "otklik['grade'] != 'C' and otklik['vacancy_name'] in full_vacancy_name",
             pre_func=self.find_stop_count_opened_windows, eval_args=eval_args
         )
 
@@ -272,7 +272,7 @@ class BaseFunctions:
 
     def open_b_without_vac(self):
         send_msg(f'{AUTH.login_admin} открыть В-грейды без откликов')
-        self.find_and_open_link("otklik['profile_status'] == 'Профиль создан' and '@' not in otklik['vacancy_name']")
+        self.find_and_open_link("'@' not in otklik['vacancy_name']")
 
 
     def open_all_c(self):
@@ -281,13 +281,13 @@ class BaseFunctions:
 
     def gms_vac(self):
         send_msg(f'{AUTH.login_admin} открыть вакансии GMS')
-        self.find_and_open_link("otklik['profile_status'] == 'Профиль создан'", iterator=self.gms_pages)
+        self.find_and_open_link(True, pre_func=self.find_stop_count_opened_windows, is_eval=False)
 
     def next_candidate(self, counter, to_predst):
         self.driver.switch_to.window(self.driver.window_handles[0])
         for i in to_predst[counter[0]][1:]:
             self.driver.switch_to.new_window('tab')
-            self.driver.get(f'https://office.gms.tech/{i}')
+            self.driver.get(links.office + i)
 
         counter[0] += 1
 
@@ -296,7 +296,6 @@ class BaseFunctions:
 
         all_otklik = []
         for i in self.pages:
-            if i['profile_status'] == 'Профиль создан':
                 all_otklik.append([i['mail'], i['link']])
 
         all_mails = set()
@@ -314,16 +313,28 @@ class BaseFunctions:
 
         return counter, to_predst
 
-    def how_many_vac(self):
+    def how_many_vac(self) -> int:
         send_msg(f'{AUTH.login_admin} подсчет вакансий')
 
         number = 0
-        for num in range(1, self.how_many_pages() + 1):
-            self.driver.get(f'https://office.gms.tech/candidate_applications?filter=waiting_for_review&page={num}')
-            _ = self.driver.find_element(By.XPATH, xpaths.table_body)
-            soup = BeautifulSoup(self.driver.page_source, 'lxml')
-            for i in soup.find(class_='table table-hover table-sm').find_all('tr')[1:]:
-                if i.find_all('td')[6].text == 'Профиль создан': number += 1
-        print('Сейчас надо представить:', number, 'вакансий')
+        for _ in self.pages: number += 1
+
+        return number
+
+    def declination(self, num):
+        if (dcln := num) / 100 > 0:
+            if 5 <= dcln <= 20:
+                return 0
+        match num % 10:
+            case 1:
+                return 2
+            case a if a < 5:
+                return 1
+            case _:
+                return 0
 
 
+    def get_string_vac(self):
+        count = self.how_many_vac()
+        end = ["вакансий", "вакансии", "вакансия"][self.declination(count)]
+        return f"Сейчас надо представить: {count} {end}"
