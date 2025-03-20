@@ -28,7 +28,7 @@ class ReturnValue(enum.IntEnum):
 
 @dataclass(frozen=True, order=True, slots=True)
 class Links:
-    office: str = 'https://office.gms.tech/'
+    office: str = 'https://office.gms.tech'
 
     @staticmethod
     def get_office_url(num):

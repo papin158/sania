@@ -40,7 +40,7 @@ class BaseFunctions:
 
     def open_link(self, link):
         self.driver.switch_to.window(self.main_page)
-        self.driver.create_new_tab(link)
+        self.driver.create_new_tab(link, slow=True)
 
     def close_all_windows(self):
         browser_list = self.driver.window_handles
@@ -287,7 +287,7 @@ class BaseFunctions:
         self.driver.switch_to.window(self.driver.window_handles[0])
         for i in to_predst[counter[0]][1:]:
             self.driver.switch_to.new_window('tab')
-            self.driver.get(links.office + i)
+            self.driver.get(links.office + '/' + i)
 
         counter[0] += 1
 
